@@ -23,6 +23,9 @@ struct TreeNode<T> {
     pub color: NodeColor,
     pub key: T,
     pub parent: RedBlackTree,
+    pub data: D,
+
+    
     left: RedBlackTree,
     right: RedBlackTree,
 }
@@ -35,7 +38,10 @@ impl TreeNode{
     fn empty() -> () { () }
 
     //Insert a node to the red-black tree. (Samantha)
-    fn insert() -> () { () }
+    fn insert(&mut self, key: T, data: D) { 
+        self.root = Self::put(self.root, None, key, data, &mut self.nodes);
+        self.nodes[self.root.unwrap()].color = NodeColor::Black;
+     }
     
     //Delete a node from the red-black tree. (Essam)
     fn delete() -> () { () }
