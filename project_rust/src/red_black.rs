@@ -42,6 +42,7 @@ enum NodeColor { //color of node either red or black
 
 type RedBlackTree= Option<usize>;
 
+#[derive(Debug)]
 struct TreeNode<K: Ord, V> { //each tree node has
     color: NodeColor,  //node color either red or black (red for new nodes, black for root)
     key: K, //key of node
@@ -95,7 +96,7 @@ impl<K: Ord, V> node_ptr<K, V>{
             parent: node_ptr(ptr::null_mut()),
             key: k,
             value: v,
-            height: 0,
+            height: 0, //TODO implement height in insertion
         };
         node_ptr(Box::into_raw(Box::new(node)))
     }
@@ -137,6 +138,15 @@ impl<K: Ord, V> node_ptr<K, V>{
     #[inline]
     fn is_black(&mut self) -> bool{
         self.get_color() == NodeColor::Black
+    }
+
+    #[inline]
+    fn swap_color(&mut self){
+        if self.is_red(){
+            self.set_black();
+        }else{
+            self.set_red();
+        }
     }
     //###############################################
 
@@ -227,7 +237,7 @@ impl<K: Ord, V> node_ptr<K, V>{
     }
 }
 
-
+#[derive(Debug)]
 pub struct RBTree<K: Ord, V> {
     root: node_ptr<K, V>,
     len: usize,
@@ -256,6 +266,7 @@ impl<K: Ord, V> RBTree<K, V> {
     }
 
     //similar to BST insertion, then rebalancing is unique to RBTree
+    //TODO FIX INSERTION BALANCE FUNC
     pub fn insert(&mut self, k: K, v: V) -> Result<(), RBBaseErr>{
         self.len+=1;
         let mut new_node = node_ptr::new(k, v);
@@ -294,16 +305,207 @@ impl<K: Ord, V> RBTree<K, V> {
 
         new_node.set_red(); //set color of newly inserted node to red
 
-        //self.insert_balance(new_node).unwrap(); //recolour and rotate
+        self.insert_balance(new_node).unwrap(); //recolour and rotate
+
 
         Ok(())
     }
 
     //Recolour and rotation for RBTree after insertion
+    /*
+    * RBTree Properties:
+        1- Root is always black (done)
+        2- Every null leaf is black (done)
+        3- If the node is red then children are black
+        4- Every path from a node to any of its descendent Null nodes has same number of black nodes
+    
+    * RBTree insertion rules:
+        1- If the tree is empty, create new node as root node with color black (done)
+        2- If tree is not empty, create new node as leaf node with color Red (done)
+        3- If parent of new node is black then exit (done)
+        4- If parent of new node is Red, then check the color of parents sibling of new node:
+            a- If color is black or null then do suitable rotation and recolor
+            b- If color is Red, then recolor and also check if parent's parent of newnode is not root node then recolor it and recheck (done)
+
+    * Rules 4-a rotation rules:
+        1- 
+
+    */
     fn insert_balance(&mut self, mut node: node_ptr<K, V>) -> Result<(), RBBaseErr>{
 
+        let mut node_parent = node.get_parent();
 
+        if node_parent.is_black(){ //3
+            return Ok(());
+        }
+
+        while node.get_parent().is_red(){
+            
+            node_parent = node.get_parent();
+            let mut node_gparent = node_parent.get_parent();
+            
+            if node_parent == node_gparent.get_left(){ 
+                /*
+                 G
+                / \
+                P           
+                */
+                let mut node_uncle = node_gparent.get_right();
+                /*
+                 G
+                / \
+                P  U        
+                */
+                    if node_uncle.is_red() && !node_uncle.is_null(){ //4a
+                        node_parent.set_black();
+                        node_uncle.set_black();
+                        node_gparent.set_red();
+                        node = node_gparent;
+                        continue;
+
+                    }else{ //uncle is black or null
+                        //1: Left Left Case(LL rotation)
+                        /*
+                         G
+                        / \
+                       P  U 
+                      /
+                     N
+                        */
+                        if node_parent.get_left() == node{
+                                self.left_left_rotation(node);
+                                node = node_parent;
+                                continue;
+                        }
+                        //2: Left Right Case (LR rotation)
+                        /*
+                         G
+                        / \
+                       P  U 
+                        \
+                        N
+                        */
+                        else{
+                            self.left_right_rotation(node);
+                            node = node_gparent;
+                            continue;
+                        }
+
+                    }
+
+            }else{ //parent is right child of gparent
+                /*
+                 G
+                / \
+                    P           
+                */
+                let mut node_uncle = node_gparent.get_left();
+                /*
+                 G
+                / \
+                U  P   
+                */
+                if node_uncle.is_red() && !node_uncle.is_null(){
+                    node_parent.set_black();
+                    node_uncle.set_black();
+                    node_parent.set_black();
+                    node_uncle.set_black();
+                    node_gparent.set_red();
+                    node = node_gparent;
+                    continue;
+
+                }else{ //uncle is black or null
+
+                    //3: Right Right Case(RR rotation)
+                    /*
+                         G
+                        / \
+                       U  P 
+                           \
+                            N
+                    */
+                    if node_parent.get_right() == node{
+                        self.right_right_rotation(node);
+                        node = node_gparent;
+                        continue;
+
+                    }
+                    //4: Rigth Left Case (RL rotation)
+                    /*
+                         G
+                        / \
+                       U  P 
+                         /
+                        N
+                     */
+                    else{
+                        self.right_left_rotation(node);
+                        node = node_gparent;
+                        continue;
+
+                    }
+
+                    
+
+                }
+
+            }
+
+    }
+        
         Ok(())
+    }
+
+    fn left_left_rotation(&mut self, node: node_ptr<K, V>){
+        let mut node_parent = node.get_parent();
+        let right_parent = node_parent.get_right();
+        let mut node_gparent = node_parent.get_parent();
+        node_gparent.set_left(right_parent);
+        node_parent.set_right(node_gparent);
+        if node_parent == self.root{
+            node_gparent.swap_color();
+            return;
+        }
+        node_parent.swap_color();
+        node_gparent.swap_color();
+    }
+
+    fn left_right_rotation(&mut self, mut node: node_ptr<K, V>){
+        let right_node = node.get_right();
+        let left_node = node.get_left();
+        let mut node_parent = node.get_parent();
+        let mut node_gparent = node_parent.get_parent();
+        let left_parent = node_parent.get_left();
+        node_parent.set_right(right_node);
+        node_parent.set_left(left_node);
+        node.set_left(node_parent);
+        node.set_right(left_parent);
+        node_gparent.set_left(node);
+        self.left_left_rotation(node_parent);
+    }
+
+    fn right_right_rotation(&mut self, node: node_ptr<K, V>){
+        let mut node_parent = node.get_parent();
+        let left_parent = node_parent.get_left();
+        let mut node_gparent = node_parent.get_parent();
+        node_gparent.set_right(left_parent);
+        node_parent.set_left(node_gparent);
+        if node_parent == self.root{
+            node_gparent.swap_color();
+            return;
+        }
+        node_parent.swap_color();
+        node_gparent.swap_color();
+    }
+
+    fn right_left_rotation(&mut self, mut node: node_ptr<K, V>){
+        let right_node = node.get_right();
+        let mut node_parent = node.get_parent();
+        let mut node_gparent = node_parent.get_parent();
+        node_parent.set_left(right_node);
+        node.set_right(node_parent);
+        node_gparent.set_right(node);
+        self.right_right_rotation(node_parent);
     }
 
 
@@ -334,6 +536,22 @@ mod tests {
         tree.insert(2, 2).unwrap();
         tree.insert(1, 1).unwrap();
         tree.insert(3, 3).unwrap();
+        /*
+This tree size = 5, begin:-------------
+'k:4 v:4 c:Black' is root node
+k:2 v:2 c:Black is k:4 v:4 c:Black's "left" child 
+k:1 v:1 c:Red is k:2 v:2 c:Black's "left" child 
+k:3 v:3 c:Red is k:2 v:2 c:Black's "right" child 
+k:5 v:5 c:Black is k:4 v:4 c:Black's "right" child 
+end--------------------------
+        */
+        unsafe{
+            println!("{:?}", *(tree.root.0));
+            println!("{:?}", *(tree.root.get_left().0));
+            println!("{:?}", *(tree.root.get_right().0));
+            println!("{:?}", *(tree.root.get_left().get_left().0));
+            println!("{:?}", *(tree.root.get_left().get_right().0));
+        }
 
         assert_eq!(tree.len(), 5);
     }
@@ -342,17 +560,6 @@ mod tests {
     fn delete_test(){
 
     }
-
-    #[test]
-    fn count_test(){
-
-    }
-
-    #[test]
-    fn height_test(){
-
-    }
-
 
 
 }
