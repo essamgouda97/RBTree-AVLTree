@@ -294,7 +294,7 @@ impl<K: Ord, V> RBTree<K, V> {
 
         new_node.set_red(); //set color of newly inserted node to red
 
-        self.insert_balance(new_node).unwrap(); //recolour and rotate
+        //self.insert_balance(new_node).unwrap(); //recolour and rotate
 
         Ok(())
     }
@@ -305,6 +305,7 @@ impl<K: Ord, V> RBTree<K, V> {
 
         Ok(())
     }
+
 
     pub fn delete(&mut self, k: K, v: V) -> Result<(K,V), RBBaseErr>{
 
