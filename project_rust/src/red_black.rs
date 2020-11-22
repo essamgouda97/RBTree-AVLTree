@@ -12,6 +12,8 @@ use std::cmp::Ord;
 use std::cmp::Ordering;
 use std::ptr;
 use std::io::{Error, ErrorKind};
+use std::fmt::{self, Debug};
+use colored::*;
 
 //error handling
 #[derive(Debug)]
@@ -42,7 +44,7 @@ enum NodeColor { //color of node either red or black
 
 type RedBlackTree= Option<usize>;
 
-#[derive(Debug)]
+
 struct TreeNode<K: Ord, V> { //each tree node has
     color: NodeColor,  //node color either red or black (red for new nodes, black for root)
     key: K, //key of node
@@ -50,7 +52,7 @@ struct TreeNode<K: Ord, V> { //each tree node has
     parent: node_ptr<K, V>, // reference to parent
     left: node_ptr<K, V>, //reference to left child
     right: node_ptr<K, V>, //reference to right child
-    height: usize, //height of node
+    level: usize, //height of node
 }
 
 
@@ -96,7 +98,7 @@ impl<K: Ord, V> node_ptr<K, V>{
             parent: node_ptr(ptr::null_mut()),
             key: k,
             value: v,
-            height: 0, //TODO implement height in insertion
+            level: 0, //TODO implement height in insertion
         };
         node_ptr(Box::into_raw(Box::new(node)))
     }
@@ -226,8 +228,9 @@ impl<K: Ord, V> node_ptr<K, V>{
         self.get_parent().get_right() == *self
     }
 
-
-
+    fn set_level(&self, lvl:usize){
+        unsafe{(*self.0).level = lvl}
+    }
 
     //###############################################
     
@@ -523,6 +526,79 @@ impl<K: Ord, V> RBTree<K, V> {
 
 }
 
+//######################## PRINTING TREE ################################
+
+const PRINT_SPACE_GLOBAL: u32 = 5;
+
+impl<K, V> Debug for TreeNode<K, V>
+where
+    K: Ord + Debug + fmt::Display,
+    V: Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.color == NodeColor::Black{
+            
+            write!(f, "{}", self.key.to_string().black().on_white())
+        }else{
+            write!(f, "{}", self.key.to_string().red().on_white())
+        }
+        
+    }
+}
+
+//TODO implement iters for printing ?
+/// This is a method to help us to get inner struct.
+impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
+    fn print_rec(&self, node: node_ptr<K, V>, space: u32) {
+        if node.is_null() { //exit condition
+            return;
+        }
+
+        let space = space + PRINT_SPACE_GLOBAL;
+        self.print_rec(node.get_right(), space);
+        print!("\n");
+        for i in PRINT_SPACE_GLOBAL..space{
+            print!(" ")
+        }
+        unsafe {
+            print!("{:?}\n", *node.0);
+        }
+        self.print_rec(node.get_left(), space);
+
+        /* if dir == 0 {
+            unsafe {
+                println!("{:?}", *node.0);
+                println!("├──┤");
+                println!("v  v");
+            }
+        } else {
+            if dir == -1 { //left
+                unsafe {
+                    print!("{:?}", *node.0);
+                }
+            }else{ //right
+                unsafe {
+                    print!("  {:?}", *node.0);
+                }
+            };
+            
+        } */
+        /* self.print_rec(node.get_left(), 1);
+        self.print_rec(node.get_right(), 1);
+        println!("") */
+    }
+
+    pub fn print_tree(&self) {
+        if self.root.is_null() {
+            println!("[NOTE] Tree is Empty");
+            return;
+        }
+        
+        println!("[INFO] Tree size = {:?}", self.len());
+        self.print_rec(self.root, 2);
+    }
+}
+//######################################################################
 //Tests (Essam)
 mod tests {
     use super::*;
@@ -545,13 +621,8 @@ k:3 v:3 c:Red is k:2 v:2 c:Black's "right" child
 k:5 v:5 c:Black is k:4 v:4 c:Black's "right" child 
 end--------------------------
         */
-        unsafe{
-            println!("{:?}", *(tree.root.0));
-            println!("{:?}", *(tree.root.get_left().0));
-            println!("{:?}", *(tree.root.get_right().0));
-            println!("{:?}", *(tree.root.get_left().get_left().0));
-            println!("{:?}", *(tree.root.get_left().get_right().0));
-        }
+        tree.print_tree();
+        //println!("{}", "test".white().on_black());
 
         assert_eq!(tree.len(), 5);
     }
