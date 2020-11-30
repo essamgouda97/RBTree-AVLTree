@@ -18,6 +18,7 @@ use colored::*;
 //error handling
 #[derive(Debug)]
 pub enum RBBaseErr {
+    DuplicateErr,
     UndefError(Error),
 }
 
@@ -102,6 +103,8 @@ impl<K: Ord, V> node_ptr<K, V>{
         };
         node_ptr(Box::into_raw(Box::new(node)))
     }
+
+   
 
     //############ HANDLING COLORS ##################
     #[inline]
@@ -246,8 +249,62 @@ pub struct RBTree<K: Ord, V> {
     len: usize,
 }
 
+//######################## PRINTING TREE ################################
+//TODO ADD A WAY TO PRINT STARTING FROM A CERTAIN NODE
 
-impl<K: Ord, V> RBTree<K, V> {
+const PRINT_SPACE_GLOBAL: u32 = 5;
+
+//TreeNode display
+impl<K, V> Debug for TreeNode<K, V>
+where
+    K: Ord + Debug + fmt::Display,
+    V: Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.color == NodeColor::Black{
+            
+            write!(f, "{}", self.key.to_string().black().on_white())
+        }else{
+            write!(f, "{}", self.key.to_string().red().on_white())
+        }
+        
+    }
+}
+
+
+//RBTree display
+impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
+    fn print_rec(&self, node: node_ptr<K, V>, mut space: u32) {
+        if node.is_null() { //exit condition
+            return;
+        }
+
+        space = space + PRINT_SPACE_GLOBAL;
+        self.print_rec(node.get_right(), space);
+        print!("\n");
+        for _ in PRINT_SPACE_GLOBAL..space{
+            print!(" ")
+        }
+        unsafe {
+            print!("{:?}\n", *node.0);
+        }
+        self.print_rec(node.get_left(), space);
+
+    }
+
+    pub fn print_tree(&self, space: u32) {
+        if self.root.is_null() {
+            println!("[NOTE] Tree is Empty");
+            return;
+        }
+        
+        println!("[INFO] Tree size = {:?}", self.len());
+        self.print_rec(self.root, space);
+    }
+}
+//######################################################################
+
+impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
     //returns an empty RBTree
     pub fn new() -> RBTree<K, V> {
         RBTree {
@@ -288,8 +345,11 @@ impl<K: Ord, V> RBTree<K, V> {
                 Ordering::Less => {
                     temp_root = temp_root.get_left();
                 },
-                _ => {
+                Ordering::Greater => {
                     temp_root = temp_root.get_right();
+                },
+                _ => {
+                    return Err(RBBaseErr::DuplicateErr);
                 }
 
             };
@@ -335,18 +395,38 @@ impl<K: Ord, V> RBTree<K, V> {
 
     */
     fn insert_balance(&mut self, mut node: node_ptr<K, V>) -> Result<(), RBBaseErr>{
-
+        
         let mut node_parent = node.get_parent();
+        
+        //self.print_tree(1);
+        
+        
+        
+        //println!("{}", node == self.root);
+        if node == self.root{
+            node.set_black();
+            return Ok(());
+        }else if node_parent == self.root{
+            node_parent.set_black();
+            return Ok(());
+        }
+        
+        // unsafe{
+        //     println!("{:?} {:?}", *node.0, *node_parent.0);
+        // }
 
         if node_parent.is_black(){ //3
             return Ok(());
         }
 
-        while node.get_parent().is_red(){
-            
-            node_parent = node.get_parent();
+        
+        
+
+        if node_parent.is_red(){
+
             let mut node_gparent = node_parent.get_parent();
-            
+
+
             if node_parent == node_gparent.get_left(){ 
                 /*
                  G
@@ -359,12 +439,11 @@ impl<K: Ord, V> RBTree<K, V> {
                 / \
                 P  U        
                 */
-                    if node_uncle.is_red() && !node_uncle.is_null(){ //4a
+                    if node_uncle.is_red(){ //4a
                         node_parent.set_black();
                         node_uncle.set_black();
                         node_gparent.set_red();
-                        node = node_gparent;
-                        continue;
+                        self.insert_balance(node_gparent).unwrap();
 
                     }else{ //uncle is black or null
                         //1: Left Left Case(LL rotation)
@@ -377,8 +456,6 @@ impl<K: Ord, V> RBTree<K, V> {
                         */
                         if node_parent.get_left() == node{
                                 self.left_left_rotation(node);
-                                node = node_parent;
-                                continue;
                         }
                         //2: Left Right Case (LR rotation)
                         /*
@@ -390,8 +467,6 @@ impl<K: Ord, V> RBTree<K, V> {
                         */
                         else{
                             self.left_right_rotation(node);
-                            node = node_gparent;
-                            continue;
                         }
 
                     }
@@ -408,17 +483,13 @@ impl<K: Ord, V> RBTree<K, V> {
                 / \
                 U  P   
                 */
-                if node_uncle.is_red() && !node_uncle.is_null(){
-                    node_parent.set_black();
-                    node_uncle.set_black();
+                if node_uncle.is_red(){
                     node_parent.set_black();
                     node_uncle.set_black();
                     node_gparent.set_red();
-                    node = node_gparent;
-                    continue;
+                    self.insert_balance(node_gparent).unwrap();
 
                 }else{ //uncle is black or null
-
                     //3: Right Right Case(RR rotation)
                     /*
                          G
@@ -429,8 +500,6 @@ impl<K: Ord, V> RBTree<K, V> {
                     */
                     if node_parent.get_right() == node{
                         self.right_right_rotation(node);
-                        node = node_gparent;
-                        continue;
 
                     }
                     //4: Rigth Left Case (RL rotation)
@@ -443,8 +512,6 @@ impl<K: Ord, V> RBTree<K, V> {
                      */
                     else{
                         self.right_left_rotation(node);
-                        node = node_gparent;
-                        continue;
 
                     }
 
@@ -455,59 +522,107 @@ impl<K: Ord, V> RBTree<K, V> {
             }
 
     }
+    if node == self.root{
+        node.set_black();
+    }
         
         Ok(())
     }
 
     fn left_left_rotation(&mut self, node: node_ptr<K, V>){
         let mut node_parent = node.get_parent();
-        let right_parent = node_parent.get_right();
+        let mut right_parent = node_parent.get_right();
         let mut node_gparent = node_parent.get_parent();
+
         node_gparent.set_left(right_parent);
         node_parent.set_right(node_gparent);
-        if node_parent == self.root{
-            node_gparent.swap_color();
-            return;
+
+        node_parent.set_black();
+        node_gparent.set_red();
+
+        let mut ggparent = node_gparent.get_parent();
+
+        if node_gparent == ggparent.get_right(){
+            //println!("here");
+            ggparent.set_right(node_parent);
+        }else{
+            //println!("there");
+            ggparent.set_left(node_parent);
         }
-        node_parent.swap_color();
-        node_gparent.swap_color();
+
+        if node_gparent == self.root{
+            self.set_root(node_parent);
+        }
+        
+        right_parent.set_parent(node_gparent);
+        node_gparent.set_parent(node_parent);
+        node_parent.set_parent(ggparent);
+
     }
 
     fn left_right_rotation(&mut self, mut node: node_ptr<K, V>){
-        let right_node = node.get_right();
-        let left_node = node.get_left();
+        let mut right_node = node.get_right();
+        let mut left_node = node.get_left();
         let mut node_parent = node.get_parent();
         let mut node_gparent = node_parent.get_parent();
-        let left_parent = node_parent.get_left();
+        let mut left_parent = node_parent.get_left();
+
         node_parent.set_right(right_node);
         node_parent.set_left(left_node);
         node.set_left(node_parent);
         node.set_right(left_parent);
         node_gparent.set_left(node);
+
+        right_node.set_parent(node_parent);
+        right_node.set_parent(node_parent);
+        node_parent.set_parent(node);
+        left_parent.set_parent(node);
+        node.set_parent(node_gparent);
+
         self.left_left_rotation(node_parent);
     }
 
     fn right_right_rotation(&mut self, node: node_ptr<K, V>){
         let mut node_parent = node.get_parent();
-        let left_parent = node_parent.get_left();
+        let mut left_parent = node_parent.get_left();
         let mut node_gparent = node_parent.get_parent();
+
+        
         node_gparent.set_right(left_parent);
         node_parent.set_left(node_gparent);
-        if node_parent == self.root{
-            node_gparent.swap_color();
-            return;
+
+        node_parent.set_black();
+        node_gparent.set_red();
+        let mut ggparent = node_gparent.get_parent();
+        if node_gparent == ggparent.get_right(){
+            ggparent.set_right(node_parent);
+        }else{
+            ggparent.set_left(node_parent);
         }
-        node_parent.swap_color();
-        node_gparent.swap_color();
+        
+        if node_gparent == self.root{
+            self.set_root(node_parent);
+        }
+
+        left_parent.set_parent(node_gparent);
+        node_gparent.set_parent(node_parent);
+        node_parent.set_parent(ggparent);
+
     }
 
     fn right_left_rotation(&mut self, mut node: node_ptr<K, V>){
-        let right_node = node.get_right();
+        let mut right_node = node.get_right();
         let mut node_parent = node.get_parent();
         let mut node_gparent = node_parent.get_parent();
+
         node_parent.set_left(right_node);
         node.set_right(node_parent);
         node_gparent.set_right(node);
+
+        right_node.set_parent(node_parent);
+        node_parent.set_parent(node);
+        node.set_parent(node_gparent);
+
         self.right_right_rotation(node_parent);
     }
 
@@ -523,82 +638,15 @@ impl<K: Ord, V> RBTree<K, V> {
         Ok(())
     }
 
+    fn set_root(&mut self, node: node_ptr<K, V>){
+        unsafe{
+            (*self).root = node;
+        }
+    }
 
 }
 
-//######################## PRINTING TREE ################################
 
-const PRINT_SPACE_GLOBAL: u32 = 5;
-
-impl<K, V> Debug for TreeNode<K, V>
-where
-    K: Ord + Debug + fmt::Display,
-    V: Debug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.color == NodeColor::Black{
-            
-            write!(f, "{}", self.key.to_string().black().on_white())
-        }else{
-            write!(f, "{}", self.key.to_string().red().on_white())
-        }
-        
-    }
-}
-
-//TODO implement iters for printing ?
-/// This is a method to help us to get inner struct.
-impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
-    fn print_rec(&self, node: node_ptr<K, V>, space: u32) {
-        if node.is_null() { //exit condition
-            return;
-        }
-
-        let space = space + PRINT_SPACE_GLOBAL;
-        self.print_rec(node.get_right(), space);
-        print!("\n");
-        for i in PRINT_SPACE_GLOBAL..space{
-            print!(" ")
-        }
-        unsafe {
-            print!("{:?}\n", *node.0);
-        }
-        self.print_rec(node.get_left(), space);
-
-        /* if dir == 0 {
-            unsafe {
-                println!("{:?}", *node.0);
-                println!("├──┤");
-                println!("v  v");
-            }
-        } else {
-            if dir == -1 { //left
-                unsafe {
-                    print!("{:?}", *node.0);
-                }
-            }else{ //right
-                unsafe {
-                    print!("  {:?}", *node.0);
-                }
-            };
-            
-        } */
-        /* self.print_rec(node.get_left(), 1);
-        self.print_rec(node.get_right(), 1);
-        println!("") */
-    }
-
-    pub fn print_tree(&self) {
-        if self.root.is_null() {
-            println!("[NOTE] Tree is Empty");
-            return;
-        }
-        
-        println!("[INFO] Tree size = {:?}", self.len());
-        self.print_rec(self.root, 2);
-    }
-}
-//######################################################################
 //Tests (Essam)
 mod tests {
     use super::*;
@@ -612,25 +660,29 @@ mod tests {
         tree.insert(2, 2).unwrap();
         tree.insert(1, 1).unwrap();
         tree.insert(3, 3).unwrap();
-        /*
-This tree size = 5, begin:-------------
-'k:4 v:4 c:Black' is root node
-k:2 v:2 c:Black is k:4 v:4 c:Black's "left" child 
-k:1 v:1 c:Red is k:2 v:2 c:Black's "left" child 
-k:3 v:3 c:Red is k:2 v:2 c:Black's "right" child 
-k:5 v:5 c:Black is k:4 v:4 c:Black's "right" child 
-end--------------------------
-        */
-        tree.print_tree();
+        tree.insert(6, 6).unwrap();
+        tree.insert(0, 0).unwrap();
+        tree.insert(9, 9).unwrap();
+        tree.insert(11, 11).unwrap();
+        tree.insert(13, 13).unwrap();
+        tree.insert(67, 67).unwrap();
+        tree.insert(68, 68).unwrap();
+        tree.insert(69, 69).unwrap();
+        tree.insert(77, 77).unwrap();
+        tree.insert(88, 88).unwrap();
+        tree.insert(99, 99).unwrap();
+        tree.insert(608, 608).unwrap();
+        tree.insert(111, 111).unwrap();
+        tree.insert(222, 222).unwrap();
+        tree.insert(300,300).unwrap();
+
+
+        tree.print_tree(1);
         //println!("{}", "test".white().on_black());
 
-        assert_eq!(tree.len(), 5);
+        //assert_eq!(tree.len(), 9);
     }
 
-    #[test]
-    fn delete_test(){
-
-    }
 
 
 }
