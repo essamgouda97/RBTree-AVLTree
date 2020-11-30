@@ -5,15 +5,18 @@
 4- Return the height of a tree.
 5- Print In-order traversal of the tree.
 6- Check if the tree is empty.
-
 */
+
+#![allow(dead_code)]
+#![allow(non_camel_case_types)]
 
 use std::cmp::Ord;
 use std::cmp::Ordering;
 use std::ptr;
-use std::io::{Error, ErrorKind};
+use std::io::{Error};
 use std::fmt::{self, Debug};
 use colored::*;
+use std::cmp::max;
 
 //error handling
 #[derive(Debug)]
@@ -42,8 +45,6 @@ enum NodeColor { //color of node either red or black
     Red,
     Black,
 }
-
-type RedBlackTree= Option<usize>;
 
 
 struct TreeNode<K: Ord, V> { //each tree node has
@@ -103,8 +104,6 @@ impl<K: Ord, V> node_ptr<K, V>{
         };
         node_ptr(Box::into_raw(Box::new(node)))
     }
-
-   
 
     //############ HANDLING COLORS ##################
     #[inline]
@@ -301,6 +300,82 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
         println!("[INFO] Tree size = {:?}", self.len());
         self.print_rec(self.root, space);
     }
+
+    pub fn inorder_trav_print(&self){
+        if self.root.is_null() {
+            println!("[NOTE] Tree is Empty");
+            return;
+        }
+        println!("[INFO] Tree size = {:?}", self.len());
+        self.trav_print_rec(self.root.get_left());
+        unsafe{
+            print!("{:?} ", *self.root.0);
+        }
+        self.trav_print_rec(self.root.get_right());
+    }
+
+    fn trav_print_rec(&self, node: node_ptr<K, V>){
+        if node.is_null(){
+            return;
+        }
+        self.trav_print_rec(node.get_left());
+        unsafe{
+            print!("{:?} ", *node.0);
+        }
+        self.trav_print_rec(node.get_right());
+        
+    }
+
+    pub fn preorder_trav_print(&self){
+        if self.root.is_null() {
+            println!("[NOTE] Tree is Empty");
+            return;
+        }
+        println!("[INFO] Tree size = {:?}", self.len());
+        unsafe{
+            print!("{:?} ", *self.root.0);
+        }
+        self.preorder_print_rec(self.root.get_left());
+        self.preorder_print_rec(self.root.get_right());
+    }
+
+    fn preorder_print_rec(&self, node: node_ptr<K, V>){
+        if node.is_null(){
+            return;
+        }
+        unsafe{
+            print!("{:?} ", *node.0);
+        }
+        self.preorder_print_rec(node.get_left());
+        self.preorder_print_rec(node.get_right());
+    }
+
+    pub fn postorder_trav_print(&self){
+        if self.root.is_null() {
+            println!("[NOTE] Tree is Empty");
+            return;
+        }
+        println!("[INFO] Tree size = {:?}", self.len());
+        
+        self.preorder_print_rec(self.root.get_left());
+        self.preorder_print_rec(self.root.get_right());
+        unsafe{
+            print!("{:?} ", *self.root.0);
+        }
+    }
+
+    fn postorder_print_rec(&self, node: node_ptr<K, V>){
+        if node.is_null(){
+            return;
+        }
+        
+        self.preorder_print_rec(node.get_left());
+        self.preorder_print_rec(node.get_right());
+        unsafe{
+            print!("{:?} ", *node.0);
+        }
+    }
+
 }
 //######################################################################
 
@@ -326,7 +401,6 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
     }
 
     //similar to BST insertion, then rebalancing is unique to RBTree
-    //TODO FIX INSERTION BALANCE FUNC
     pub fn insert(&mut self, k: K, v: V) -> Result<(), RBBaseErr>{
         self.len+=1;
         let mut new_node = node_ptr::new(k, v);
@@ -562,7 +636,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
 
     fn left_right_rotation(&mut self, mut node: node_ptr<K, V>){
         let mut right_node = node.get_right();
-        let mut left_node = node.get_left();
+        let left_node = node.get_left();
         let mut node_parent = node.get_parent();
         let mut node_gparent = node_parent.get_parent();
         let mut left_parent = node_parent.get_left();
@@ -639,9 +713,35 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
     }
 
     fn set_root(&mut self, node: node_ptr<K, V>){
-        unsafe{
-            (*self).root = node;
+        
+        (*self).root = node;
+        
+    }
+
+    pub fn get_height(&self) -> Option<usize>{
+        let mut height = 0;
+        if self.is_empty(){
+            return Some(height);
+        }else{
+            
+            height = self.get_height_rec(self.root,1);
+
         }
+
+        return Some(height);
+    }
+
+    fn get_height_rec(&self, node: node_ptr<K, V>, mut h: usize) -> usize{
+        if node.is_null(){
+            return h-1;
+        }
+
+        h += 1;
+
+        let height_r = self.get_height_rec(node.get_right(), h);
+        let height_l = self.get_height_rec(node.get_left(), h);
+
+        max(height_r, height_l)
     }
 
 }
@@ -649,6 +749,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
 
 //Tests (Essam)
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
     #[test]
@@ -683,6 +784,113 @@ mod tests {
         //assert_eq!(tree.len(), 9);
     }
 
+    #[test]
+    fn height_test(){
+        let mut tree: RBTree<usize, usize> = RBTree::new();
 
+        tree.insert(4, 4).unwrap();
+        tree.insert(5, 5).unwrap();
+        tree.insert(2, 2).unwrap();
+        tree.insert(1, 1).unwrap();
+        tree.insert(3, 3).unwrap();
+        tree.insert(6, 6).unwrap();
+        tree.insert(0, 0).unwrap();
+        tree.insert(9, 9).unwrap();
+
+        let h = tree.get_height().unwrap();
+
+        //tree.print_tree(1);
+        println!("{}", h);
+    }
+
+    #[test]
+    fn print_inorder_test(){
+        let mut tree: RBTree<usize, usize> = RBTree::new();
+
+        tree.insert(4, 4).unwrap();
+        tree.insert(5, 5).unwrap();
+        tree.insert(2, 2).unwrap();
+        tree.insert(1, 1).unwrap();
+        tree.insert(3, 3).unwrap();
+        tree.insert(6, 6).unwrap();
+        tree.insert(0, 0).unwrap();
+        tree.insert(9, 9).unwrap();
+        tree.insert(11, 11).unwrap();
+        tree.insert(13, 13).unwrap();
+        tree.insert(67, 67).unwrap();
+        tree.insert(68, 68).unwrap();
+        tree.insert(69, 69).unwrap();
+        tree.insert(77, 77).unwrap();
+        tree.insert(88, 88).unwrap();
+        tree.insert(99, 99).unwrap();
+        tree.insert(608, 608).unwrap();
+        tree.insert(111, 111).unwrap();
+        tree.insert(222, 222).unwrap();
+        tree.insert(300,300).unwrap();
+
+        tree.print_tree(1);
+
+        tree.inorder_trav_print();
+    }
+
+    #[test]
+    fn print_preorder_test(){
+        let mut tree: RBTree<usize, usize> = RBTree::new();
+
+        tree.insert(4, 4).unwrap();
+        tree.insert(5, 5).unwrap();
+        tree.insert(2, 2).unwrap();
+        tree.insert(1, 1).unwrap();
+        tree.insert(3, 3).unwrap();
+        tree.insert(6, 6).unwrap();
+        tree.insert(0, 0).unwrap();
+        tree.insert(9, 9).unwrap();
+        tree.insert(11, 11).unwrap();
+        tree.insert(13, 13).unwrap();
+        tree.insert(67, 67).unwrap();
+        tree.insert(68, 68).unwrap();
+        tree.insert(69, 69).unwrap();
+        tree.insert(77, 77).unwrap();
+        tree.insert(88, 88).unwrap();
+        tree.insert(99, 99).unwrap();
+        tree.insert(608, 608).unwrap();
+        tree.insert(111, 111).unwrap();
+        tree.insert(222, 222).unwrap();
+        tree.insert(300,300).unwrap();
+
+        tree.print_tree(1);
+
+        tree.preorder_trav_print();
+    }
+
+    #[test]
+    fn print_postorder_test(){
+        let mut tree: RBTree<usize, usize> = RBTree::new();
+
+        tree.insert(4, 4).unwrap();
+        tree.insert(5, 5).unwrap();
+        tree.insert(2, 2).unwrap();
+        tree.insert(1, 1).unwrap();
+        tree.insert(3, 3).unwrap();
+        tree.insert(6, 6).unwrap();
+        tree.insert(0, 0).unwrap();
+        tree.insert(9, 9).unwrap();
+        tree.insert(11, 11).unwrap();
+        tree.insert(13, 13).unwrap();
+        tree.insert(67, 67).unwrap();
+        tree.insert(68, 68).unwrap();
+        tree.insert(69, 69).unwrap();
+        tree.insert(77, 77).unwrap();
+        tree.insert(88, 88).unwrap();
+        tree.insert(99, 99).unwrap();
+        tree.insert(608, 608).unwrap();
+        tree.insert(111, 111).unwrap();
+        tree.insert(222, 222).unwrap();
+        tree.insert(300,300).unwrap();
+
+        tree.print_tree(1);
+
+        tree.postorder_trav_print();
+    }
 
 }
