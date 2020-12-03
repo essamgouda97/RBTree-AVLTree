@@ -8,3 +8,9 @@ edition = "2018"
 
 [dependencies]
 colored = "2.0.0"
+criterion = "0.3"	
+rand = "0.7.0"
+
+[[bench]]
+name = "my_benchmark"
+harness = false

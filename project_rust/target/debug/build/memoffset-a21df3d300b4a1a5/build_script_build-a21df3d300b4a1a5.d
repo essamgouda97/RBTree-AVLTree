@@ -1,0 +1,5 @@
+C:\Users\saman\Desktop\ECE522-Project\project_rust\target\debug\build\memoffset-a21df3d300b4a1a5\build_script_build-a21df3d300b4a1a5.exe: C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\memoffset-0.6.1\build.rs
+
+C:\Users\saman\Desktop\ECE522-Project\project_rust\target\debug\build\memoffset-a21df3d300b4a1a5\build_script_build-a21df3d300b4a1a5.d: C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\memoffset-0.6.1\build.rs
+
+C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\memoffset-0.6.1\build.rs:
