@@ -1,0 +1,12 @@
+C:\Users\saman\Desktop\ECE522-Project\project_rust\target\debug\deps\half-2cba7415c9fab4c4.rmeta: C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\lib.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\bfloat.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\bfloat\convert.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\binary16.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\binary16\convert.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\slice.rs
+
+C:\Users\saman\Desktop\ECE522-Project\project_rust\target\debug\deps\libhalf-2cba7415c9fab4c4.rlib: C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\lib.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\bfloat.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\bfloat\convert.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\binary16.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\binary16\convert.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\slice.rs
+
+C:\Users\saman\Desktop\ECE522-Project\project_rust\target\debug\deps\half-2cba7415c9fab4c4.d: C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\lib.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\bfloat.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\bfloat\convert.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\binary16.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\binary16\convert.rs C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\slice.rs
+
+C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\lib.rs:
+C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\bfloat.rs:
+C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\bfloat\convert.rs:
+C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\binary16.rs:
+C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\binary16\convert.rs:
+C:\Users\saman\.cargo\registry\src\github.com-1ecc6299db9ec823\half-1.6.0\src\slice.rs:
