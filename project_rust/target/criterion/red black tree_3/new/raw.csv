@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+Red Black Tree,,,,,89023600.0,ns,237
+Red Black Tree,,,,,181400000.0,ns,474
+Red Black Tree,,,,,266930100.0,ns,711
+Red Black Tree,,,,,359610300.0,ns,948
+Red Black Tree,,,,,458557600.0,ns,1185
+Red Black Tree,,,,,593880300.0,ns,1422
+Red Black Tree,,,,,642287000.0,ns,1659
+Red Black Tree,,,,,758887300.0,ns,1896
+Red Black Tree,,,,,1112273900.0,ns,2133
+Red Black Tree,,,,,1650853600.0,ns,2370
