@@ -362,7 +362,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
             _ => {temp_node.set_right(new_node);}
         };
 
-        // self.update_node_level(new_node);
+        self.update_node_level(new_node);
         self.insert_balance(new_node); //Rotate Tree
         Ok(())
     }
@@ -457,7 +457,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
         node.set_parent(node_gparent);
 
         self.left_left_rotation(node_parent);
-        // self.update_node_level(node);
+        self.update_node_level(node);
     }
 
     fn right_right_rotation(&mut self, node: node_ptr<K, V>){
@@ -499,7 +499,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
         node.set_parent(node_gparent);
 
         self.right_right_rotation(node_parent);
-        // self.update_node_level(node);
+        self.update_node_level(node);
     }
 
 
