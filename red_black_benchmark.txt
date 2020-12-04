@@ -1,0 +1,167 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Try the new cross-platform PowerShell https://aka.ms/pscore6
+
+PS C:\Users\saman\Desktop\ECE522-Project\project_rust> cargo bench
+warning: unused import: `std::time::Duration`
+ --> benches\my_benchmark.rs:2:5
+  |
+2 | use std::time::Duration;
+  |     ^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused variable: `node`
+   --> src\avl.rs:496:34
+    |
+496 |     fn delete_balance(&mut self, mut node: node_ptr<K, V>, mut parent: node_ptr<K, V>) -> Result<(), AVLBaseErr>{
+    |                                  ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_node`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `parent`
+   --> src\avl.rs:496:60
+    |
+496 |     fn delete_balance(&mut self, mut node: node_ptr<K, V>, mut parent: node_ptr<K, V>) -> Result<(), AVLBaseErr>{
+    |                                                            ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_parent`
+
+warning: variable does not need to be mutable
+  --> benches\my_benchmark.rs:24:25
+   |
+24 |                     let mut a = i as usize;
+   |                         ----^
+   |                         |
+   |                         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+  --> benches\my_benchmark.rs:30:25
+   |
+30 |                     let mut a = i as usize;
+   |                         ----^
+   |                         |
+   |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> src\main.rs:20:9
+   |
+20 |     let mut a = 10 as usize;
+   |         ----^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` on by default
+
+warning: 3 warnings emitted
+
+warning: variable does not need to be mutable
+   --> src\avl.rs:496:34
+    |
+496 |     fn delete_balance(&mut self, mut node: node_ptr<K, V>, mut parent: node_ptr<K, V>) -> Result<(), AVLBaseErr>{
+    |                                  ----^^^^
+    |                                  |
+    |                                  help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\avl.rs:496:60
+    |
+496 |     fn delete_balance(&mut self, mut node: node_ptr<K, V>, mut parent: node_ptr<K, V>) -> Result<(), AVLBaseErr>{
+    |                                                            ----^^^^^^
+    |                                                            |
+    |                                                            help: remove this `mut`
+
+warning: 5 warnings emitted
+
+warning: unused variable: `node`
+   --> src\avl.rs:496:34
+    |
+496 |     fn delete_balance(&mut self, mut node: node_ptr<K, V>, mut parent: node_ptr<K, V>) -> Result<(), AVLBaseErr>{
+    |                                  ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_node`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `parent`
+   --> src\avl.rs:496:60
+    |
+496 |     fn delete_balance(&mut self, mut node: node_ptr<K, V>, mut parent: node_ptr<K, V>) -> Result<(), AVLBaseErr>{
+    |                                                            ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_parent`
+
+warning: variable does not need to be mutable
+  --> src\main.rs:20:9
+   |
+20 |     let mut a = 10 as usize;
+   |         ----^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+   --> src\avl.rs:496:34
+    |
+496 |     fn delete_balance(&mut self, mut node: node_ptr<K, V>, mut parent: node_ptr<K, V>) -> Result<(), AVLBaseErr>{
+    |                                  ----^^^^
+    |                                  |
+    |                                  help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\avl.rs:496:60
+    |
+496 |     fn delete_balance(&mut self, mut node: node_ptr<K, V>, mut parent: node_ptr<K, V>) -> Result<(), AVLBaseErr>{
+    |                                                            ----^^^^^^
+    |                                                            |
+    |                                                            help: remove this `mut`
+
+warning: 5 warnings emitted
+
+    Finished bench [optimized] target(s) in 0.69s
+     Running target\release\deps\project_rust-0e8af35a47c45238.exe
+
+running 11 tests
+test avl::tests::height_test ... ignored
+test avl::tests::insert_test ... ignored
+test avl::tests::print_inorder_test ... ignored
+test avl::tests::print_postorder_test ... ignored
+test avl::tests::print_preorder_test ... ignored
+test red_black::tests::delete_test ... ignored
+test red_black::tests::height_test ... ignored
+test red_black::tests::insert_test ... ignored
+test red_black::tests::print_inorder_test ... ignored
+test red_black::tests::print_postorder_test ... ignored
+test red_black::tests::print_preorder_test ... ignored
+
+test result: ok. 0 passed; 0 failed; 11 ignored; 0 measured; 0 filtered out
+
+     Running target\release\deps\my_benchmark-7b212c0cc46568cd.exe
+Gnuplot not found, using plotters backend
+Red Black Tree          time:   [117.18 us 147.89 us 175.29 us]
+                        change: [+1.6184% +15.841% +34.543%] (p = 0.06 > 0.05)
+                        No change in performance detected.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high severe
+
+Red Black Tree #2       time:   [4.7812 ms 17.006 ms 34.723 ms]
+                        change: [+145.16% +1260.7% +7117.1%] (p = 0.08 > 0.05)
+                        No change in performance detected.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+
+Red Black Tree #3       time:   [391.49 us 500.12 us 599.56 us]
+                        change: [-97.594% -95.181% -75.764%] (p = 0.04 < 0.05)
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high severe
+
+Red Black Tree #4       time:   [513.80 us 1.1012 ms 3.3850 ms]
+                        change: [-96.581% +143.66% +1126.6%] (p = 0.71 > 0.05)
+                        No change in performance detected.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+
+Red Black Tree #5       time:   [80.596 ms 184.75 ms 265.86 ms]
+                        change: [+513.23% +1984.4% +21942%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+
+PS C:\Users\saman\Desktop\ECE522-Project\project_rust> 

@@ -2,8 +2,8 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use std::time::Duration;
 
 #[path = "../src/red_black.rs"]
-mod lib;
-use lib::*;
+mod red_black;
+use self::red_black::RBTree;
 extern crate criterion;
 extern crate rand;
 
@@ -27,7 +27,8 @@ extern crate rand;
 
                 //Search for tree_size/10
                 for i in 1..=search_size {
-                    //tree.search_function(&i);
+                    let mut a = i as usize;
+                    tree.find_node(&a);
                 }
             })
         });

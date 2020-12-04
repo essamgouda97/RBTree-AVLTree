@@ -175,6 +175,7 @@ fn rb_tree(){
         println!("(4) Return height of Tree");
         println!("(5) Print Tree");
         println!("(6) Check if tree is empty");
+        println!("(-1) Exit");
         print!("Choice: ");
         io::stdout().flush().unwrap();
         let choice = input_num();

@@ -68,7 +68,7 @@ impl<K: Ord, V> TreeNode<K, V> {
 }
 
 #[derive(Debug)]
-struct node_ptr<K: Ord, V>(*mut TreeNode<K, V>); //pointer to mutable TreeNode
+pub struct node_ptr<K: Ord, V>(*mut TreeNode<K, V>); //pointer to mutable TreeNode
 
 impl<K: Ord, V> Clone for node_ptr<K, V>{
     fn clone(&self) -> node_ptr<K, V>{ //clones the ptr
@@ -748,7 +748,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
     }
 
     #[inline]
-    fn delete(&mut self, mut node: node_ptr<K, V>) -> (K,V){
+    pub fn delete(&mut self, mut node: node_ptr<K, V>) -> (K,V){
         //self.print_tree(1);
 
         self.len -= 1;
@@ -976,6 +976,9 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
     }
 
 
+
+
+
     #[inline]
     pub fn remove_node(&mut self, k: &K) -> Option<(K,V)> {
         let node = self.find_node(k);
@@ -988,7 +991,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
     }
 
     #[inline]
-    fn find_node(&self, k: &K) -> node_ptr<K, V>{
+    pub fn find_node(&self, k: &K) -> node_ptr<K, V>{
         if self.is_empty(){ //tree is empty
             return node_ptr(ptr::null_mut());
         }
