@@ -102,12 +102,12 @@ fn input_num() -> Option<i8> {
 }
 
 fn print_welcome_tree(maxsize: u32){
-    let mut x;
-    let mut k = 1;
-    let mut z = 2;
-    let mut r = maxsize/2;
+    let mut x: u32;
+    let mut k: u32 = 1;
+    let mut z: u32 = 2;
+    let mut r: u32 = maxsize/2;
     for j in (0..=r).rev(){
-        for i in 1..j{
+        for i in 1..=j{
             x = k*2;
             print!(" ");
             if i == j{
@@ -136,7 +136,7 @@ fn print_welcome_tree(maxsize: u32){
 }
 
 fn main() {
-    println!("Trees, Trees and More Trees");
+    println!("\n\tTrees, Trees and More Trees\n");
     print_welcome_tree(37);
     loop{
         
