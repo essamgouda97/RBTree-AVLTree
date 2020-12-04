@@ -7,7 +7,6 @@
 6- Check if the tree is empty.
 */
 
-//TODO IMPLEMENT DELETE
 //TODO IMPLEMENT INTOITER
 //TODO BENCHMARKS and BENCHMARKS GRAPHS
 
@@ -270,8 +269,8 @@ impl<K: Ord, V> node_ptr<K, V>{
     #[inline]
     fn replace_val(self, node: node_ptr<K, V>){
         unsafe{
-            let obj = Box::from_raw(node.0);
-            let (k,v) = obj.pair();
+            let ans = Box::from_raw(node.0);
+            let (k,v) = ans.pair();
             (*self.0).key = k;
             (*self.0).value = v;
         }
@@ -813,8 +812,8 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
                 self.delete_balance(temp_c, temp_p).unwrap();
             }
             unsafe{
-                let obj = Box::from_raw(node.0);
-                return obj.pair();
+                let ans = Box::from_raw(node.0);
+                return ans.pair();
             }
         }
 
@@ -840,8 +839,8 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
             self.delete_balance(temp_c, temp_p).unwrap();
         }
         unsafe{
-            let obj = Box::from_raw(node.0);
-            return obj.pair();
+            let ans = Box::from_raw(node.0);
+            return ans.pair();
         }
 
     }
