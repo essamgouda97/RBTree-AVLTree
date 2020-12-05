@@ -36,8 +36,15 @@ struct TreeNode<K: Ord, V> { //each tree node has
     parent: node_ptr<K, V>, // reference to parent
     left: node_ptr<K, V>, //reference to left child
     right: node_ptr<K, V>, //reference to right child
-    level: usize, //height of node
+    level: i32, //height of node
 }
+impl<K: Ord, V> TreeNode<K, V> {
+    #[inline]
+    fn pair(self) -> (K, V){
+        (self.key, self.value)
+    }
+}
+// for printing, set all parent pointers to null as last line
 
 #[derive(Debug)]
 struct node_ptr<K: Ord, V>(*mut TreeNode<K, V>); //pointer to mutable TreeNode
@@ -87,7 +94,12 @@ impl<K: Ord, V> node_ptr<K, V>{
 
     //###############################################
     #[inline]
-    fn get_node_level(&mut self) -> usize{
+    fn set_level(&self, lvl:i32){
+        unsafe{(*self.0).level = lvl}
+    }
+
+    #[inline]
+    fn get_node_level(self) -> i32{
         unsafe{(*self.0).level}
     }
 
@@ -167,10 +179,6 @@ impl<K: Ord, V> node_ptr<K, V>{
         self.get_parent().get_right() == *self
     }
 
-    fn set_level(&self, lvl:usize){
-        unsafe{(*self.0).level = lvl}
-    }
-
     //###############################################
     
     #[inline]
@@ -203,7 +211,7 @@ where
 
 
 //AVLTree display
-impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
+impl<K: Ord + Debug + fmt::Display + Copy, V: Debug> AVLTree<K, V> {
     fn print_rec(&self, node: node_ptr<K, V>, mut space: u32) {
         if node.is_null() { //exit condition
             return;
@@ -340,62 +348,89 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
 
         if self.is_empty(){ //if the tree is empty set new node to as root
             self.root = new_node;
+            self.update_node_level(new_node);
             return Ok(());
         }
 
         while !temp_root.is_null(){ //temp root isn't null (exits when reaching a null pointer at the end of the tree)
             temp_node = temp_root;
             match new_node.cmp(&&mut temp_root){
-                Ordering::Less => {
-                    temp_root = temp_root.get_left();
-                },
-                Ordering::Greater => {
-                    temp_root = temp_root.get_right();
-                },
-                _ => {
-                    return Err(AVLBaseErr::DuplicateErr);
-                }
-
+                Ordering::Less => {temp_root = temp_root.get_left();},
+                Ordering::Greater => {temp_root = temp_root.get_right();},
+                _ => {return Err(AVLBaseErr::DuplicateErr);}
             };
         }
 
         new_node.set_parent(temp_node); //sets parent for new_node
 
         match new_node.cmp(&&mut temp_node){ //adds new node to tree
-            Ordering::Less => {
-                temp_node.set_left(new_node);
-            },
-            _ => {
-                temp_node.set_right(new_node);
-            }
+            Ordering::Less => {temp_node.set_left(new_node);},
+            _ => {temp_node.set_right(new_node);}
         };
-
+        self.update_node_level(new_node);
         self.insert_balance(new_node); //Rotate Tree
         Ok(())
     }
+    #[inline]
+
+    fn update_node_level(&mut self, node: node_ptr<K,V>){
+        let mut left = 0; // Assume that the level of the left node is of level 0 -> required if there if the node doesn't exist
+        let mut right = 0; // Assume that the level of the right node is of level 0 -> required if there if the node doesn't exist
+        if !node.get_left().is_null(){ //if the left node exists (not null)
+            left = node.get_node_level(); // get the level of the left node
+        }
+        if !node.get_right().is_null(){ //if the right node exists (not null)
+            right = node.get_node_level(); // get the level of the right node
+        }
+        // println!("{},{}", &left, &right);    
+        node.set_level(max(&left, &right)+1);
+        println!("left: {} | right: {}", &left, &right);
+        println!("node level: {}", node.get_node_level());
+        if !node.get_parent().is_null(){
+            self.update_node_level(node.get_parent())
+        }
+    }
+
     // Function required to determine the level of new nodes placed inside of the tree
     fn level_of_child_nodes(&mut self, node: node_ptr<K, V>) -> i32 {
         let mut left = 0; // Assume that the level of the left node is of level 0 -> required if there if the node doesn't exist
         let mut right = 0; // Assume that the level of the right node is of level 0 -> required if there if the node doesn't exist
-        if !node.get_parent().get_left().is_null(){ //if the left node exists (not null)
-            left = node.get_parent().get_left().get_node_level(); // get the level of the left node
+        // if !node.get_parent().get_parent().get_parent().is_null(){
+        //     println!("parent level {}",node.get_parent().get_parent().get_node_level());
+        //     println!("node level {}",node.get_node_level());
+        // }
+        
+        if !node.get_parent().get_parent().get_left().is_null(){ //if the left node exists (not null)
+            left = node.get_parent().get_parent().get_left().get_node_level(); // get the level of the left node
         }
-        if !node.get_parent().get_right().is_null(){ //if the right node exists (not null)
-            right = node.get_parent().get_right().get_node_level(); // get the level of the right node
+        if !node.get_parent().get_parent().get_right().is_null(){ //if the right node exists (not null)
+            right = node.get_parent().get_parent().get_right().get_node_level(); // get the level of the right node
         }
+        println!("difference of: {}| left: {} |right: {}", left - right, left, right);
         left as i32 - right as i32 // get the difference between left and right nodes
     }
 
     // Check the level of the nodes. Apply all necessary rotations on root. 
-    fn insert_balance(&mut self, node: node_ptr<K, V>) {
+    fn insert_balance(&mut self, node: node_ptr<K, V>){
         let level_differance = self.level_of_child_nodes(node); // get the level differances of the nodes
-        if -1 <= level_differance && level_differance <= 1 {return} // if the level differance is 1, no need to do anything.
-        if level_differance == 2 { // left node level is greater than right node level
-            self.left_right_rotation(node) // perform appropriate roatation
-        } else if level_differance == -2 {  // right node level is greater than left node level
-            self.right_left_rotation(node) // perform appropriate roatation
-        } else { // can never have level difference greater than (+/- 2)
-            unreachable!() 
+        match level_differance{
+            -1..=1 => {println!("no rotation");
+                return}, // if the level differance is -1, 0, or 1, no need to do anything -> balanced.
+            2 => {println!("left rotation");
+                if node.cmp(&node.get_parent()) == Ordering::Greater {   
+                    return self.left_right_rotation(node)}
+                else {
+                    return self.left_left_rotation(node)
+                }
+            }, // left node level is greater than right node level, perform appropriate roatation
+            -2 => {println!("right rotation");
+                if node.cmp(&node.get_parent()) == Ordering::Less {   
+                    return self.right_left_rotation(node)}
+                else {
+                    return self.right_right_rotation(node)
+                }
+            },
+            _ => {println!("error")}
         }
     }
 
@@ -422,6 +457,10 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
         node_gparent.set_parent(node_parent);
         node_parent.set_parent(ggparent);
 
+        node_gparent.set_level(node.get_node_level());
+        node_parent.set_level(node.get_node_level());
+        
+        self.update_node_level(node);
     }
 
     fn left_right_rotation(&mut self, mut node: node_ptr<K, V>){
@@ -451,7 +490,6 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
         let mut left_parent = node_parent.get_left();
         let mut node_gparent = node_parent.get_parent();
 
-        
         node_gparent.set_right(left_parent);
         node_parent.set_left(node_gparent);
         let mut ggparent = node_gparent.get_parent();
@@ -468,6 +506,8 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
         left_parent.set_parent(node_gparent);
         node_gparent.set_parent(node_parent);
         node_parent.set_parent(ggparent);
+
+        self.update_node_level(node);
 
     }
 
@@ -675,4 +715,39 @@ mod tests {
         tree.postorder_trav_print();
     }
 
+}
+fn main(){
+    let mut tree: AVLTree<usize, usize> = AVLTree::new();
+    tree.insert(10, 10).unwrap();
+    tree.insert(12, 12).unwrap();
+    tree.insert(11, 11).unwrap();
+    tree.insert(13, 13).unwrap();
+    tree.insert(5, 5).unwrap();
+    // tree.insert(6, 6).unwrap();
+    // tree.insert(17, 17).unwrap();
+    // tree.insert(7, 7).unwrap();
+    // tree.insert(2, 2).unwrap();
+    
+    // tree.insert(4, 4).unwrap();
+    // tree.insert(5, 5).unwrap();
+    // tree.insert(2, 2).unwrap();
+    // tree.insert(1, 1).unwrap();
+    // tree.insert(3, 3).unwrap();
+    // tree.insert(6, 6).unwrap();
+    // tree.insert(0, 0).unwrap();
+    // tree.insert(9, 9).unwrap();
+    // tree.insert(11, 11).unwrap();
+    // tree.insert(13, 13).unwrap();
+    // tree.insert(67, 67).unwrap();
+    // tree.insert(68, 68).unwrap();
+    // tree.insert(69, 69).unwrap();
+    // tree.insert(77, 77).unwrap();
+    // tree.insert(88, 88).unwrap();
+    // tree.insert(99, 99).unwrap();
+    // tree.insert(608, 608).unwrap();
+    // tree.insert(111, 111).unwrap();
+    // tree.insert(222, 222).unwrap();
+    // tree.insert(300,300).unwrap();
+
+    tree.print_tree(1);
 }
