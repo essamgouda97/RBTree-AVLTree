@@ -8,24 +8,31 @@
 */
 
 //TODO IMPLEMENT INTOITER
-//TODO BENCHMARKS and BENCHMARKS GRAPHS
+
 
 #![allow(dead_code)]
 #![allow(non_camel_case_types)]
 
-use std::cmp::Ord;
-use std::cmp::Ordering;
+
 use std::ptr;
 use std::io::{Error};
 use std::fmt::{self, Debug};
 use colored::*;
 use std::cmp::max;
+use std::cmp::Ord;
+use std::cmp::Ordering;
 
 //error handling
 #[derive(Debug)]
 pub enum RBBaseErr {
     DuplicateErr,
     UndefError(Error),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum NodeColor { //color of node either red or black
+    Red,
+    Black,
 }
 
 impl From<Error> for RBBaseErr {
@@ -43,13 +50,6 @@ pub fn print_error(err: &Error) {
 }
 
 
-#[derive(Clone, Debug, PartialEq, Copy, Eq)]
-enum NodeColor { //color of node either red or black
-    Red,
-    Black,
-}
-
-
 struct TreeNode<K: Ord, V> { //each tree node has
     color: NodeColor,  //node color either red or black (red for new nodes, black for root)
     key: K, //key of node
@@ -60,45 +60,11 @@ struct TreeNode<K: Ord, V> { //each tree node has
     level: usize, //height of node
 }
 
-impl<K: Ord, V> TreeNode<K, V> {
-    #[inline]
-    fn pair(self) -> (K, V){
-        (self.key, self.value)
-    }
-}
 
 #[derive(Debug)]
-pub struct node_ptr<K: Ord, V>(*mut TreeNode<K, V>); //pointer to mutable TreeNode
-
-impl<K: Ord, V> Clone for node_ptr<K, V>{
-    fn clone(&self) -> node_ptr<K, V>{ //clones the ptr
-        node_ptr(self.0) //returns the pointer
-    }
-}
-
-impl<K: Ord, V> Copy for node_ptr<K, V> {}
-
-impl<K: Ord, V> Ord for node_ptr<K, V> { //compare node key with another node key
-    fn cmp(&self, other_node: &node_ptr<K, V>) -> Ordering {
-        unsafe{
-            (*self.0).key.cmp(&(*other_node.0).key)
-        }
-    }
-}
-
-impl<K: Ord, V> Eq for node_ptr<K, V> {} //requried for Ord
-
-impl<K: Ord, V> PartialOrd for node_ptr<K, V> { //required for Ord
-    fn partial_cmp(&self, other_node: &node_ptr<K, V>) -> Option<Ordering> {
-        unsafe { Some((*self.0).key.cmp(&(*other_node.0).key)) }
-    }
-}
-
-impl<K: Ord, V> PartialEq for node_ptr<K, V> { //required for Eq and PartialOrd
-    fn eq(&self, other_node: &node_ptr<K, V>) -> bool {
-        self.0 == other_node.0
-    }
-}
+pub struct node_ptr<K: Ord, V>(
+    *mut TreeNode<K, V> //pointer to mutable TreeNode
+); 
 
 
 impl<K: Ord, V> node_ptr<K, V>{
@@ -110,40 +76,17 @@ impl<K: Ord, V> node_ptr<K, V>{
             parent: node_ptr(ptr::null_mut()),
             key: k,
             value: v,
-            level: 0, //TODO implement height in insertion
+            level: 0,
         };
         node_ptr(Box::into_raw(Box::new(node)))
     }
 
     //############ HANDLING COLORS ##################
-    #[inline]
-    fn set_color(&mut self, color: NodeColor){
-        if self.is_null(){
-            return;
-        }
-        unsafe{
-            (*self.0).color = color;
-        }
-        
-    }
-    #[inline]
-    fn set_red(&mut self){
-        self.set_color(NodeColor::Red);
-    }
-    #[inline]
-    fn set_black(&mut self){
-        self.set_color(NodeColor::Black);
-    }
 
     #[inline]
     fn get_color(&mut self) -> NodeColor{
-        if self.is_null(){
-            return NodeColor::Black;
-        }
-        unsafe{
-            (*self.0).color
-        }
-        
+        if self.is_null(){return NodeColor::Black;}
+        unsafe{(*self.0).color}
     }
     #[inline]
     fn is_red(&mut self) -> bool{
@@ -162,72 +105,62 @@ impl<K: Ord, V> node_ptr<K, V>{
             self.set_red();
         }
     }
+    #[inline]
+    fn set_color(&mut self, color: NodeColor){
+        if self.is_null(){return;}
+        unsafe{(*self.0).color = color;}
+        
+    }
+    #[inline]
+    fn set_red(&mut self){
+        self.set_color(NodeColor::Red);
+    }
+    #[inline]
+    fn set_black(&mut self){
+        self.set_color(NodeColor::Black);
+    }
     //###############################################
 
     //############ HANDLING RELATIONS ###############
     //setting parent for current node
     #[inline]
     fn set_parent(&mut self, parent: node_ptr<K, V>){
-        if self.is_null(){
-            return;
-        }
-        unsafe{
-            (*self.0).parent = parent
-        }
+        if self.is_null(){return;}
+        unsafe{(*self.0).parent = parent}
     }
 
     //setting get_right child of current node
     #[inline]
     fn set_right(&mut self, get_right: node_ptr<K, V>){
-        if self.is_null(){
-            return;
-        }
-        unsafe{
-            (*self.0).right = get_right
-        }
+        if self.is_null(){return;}
+        unsafe{(*self.0).right = get_right}
     }
 
     //setting left child for current node
     #[inline]
     fn set_left(&mut self, left: node_ptr<K, V>){
-        if self.is_null(){
-            return;
-        }
-        unsafe{
-            (*self.0).left = left
-        }
+        if self.is_null(){return;}
+        unsafe{(*self.0).left = left}
     }
 
     //getting clone of current node parent
     #[inline]
     fn get_parent(&self) -> node_ptr<K, V>{
-        if self.is_null(){
-            return node_ptr(ptr::null_mut());
-        }
-        unsafe{
-            (*self.0).parent.clone()
-        }
+        if self.is_null(){return node_ptr(ptr::null_mut());}
+        unsafe{(*self.0).parent.clone()}
     }
 
     //getting clone of current node get_right child
     #[inline]
     fn get_right(&self) -> node_ptr<K, V>{
-        if self.is_null(){
-            return node_ptr(ptr::null_mut());
-        }
-        unsafe{
-            (*self.0).right.clone()
-        }
+        if self.is_null(){return node_ptr(ptr::null_mut());}
+        unsafe{(*self.0).right.clone()}
     }
 
     //getting clone of current node left child
     fn get_left(&self) -> node_ptr<K, V>{
-        if self.is_null(){
-            return node_ptr(ptr::null_mut());
-        }
-        unsafe{
-            (*self.0).left.clone()
-        }
+        if self.is_null(){return node_ptr(ptr::null_mut());}
+        unsafe{(*self.0).left.clone()}
     }
 
     //check if current node is left child
@@ -266,28 +199,53 @@ impl<K: Ord, V> node_ptr<K, V>{
         node.get_left() == self || node.get_right() == self
     }
 
-    #[inline]
-    fn replace_val(self, node: node_ptr<K, V>){
-        unsafe{
-            let ans = Box::from_raw(node.0);
-            let (k,v) = ans.pair();
-            (*self.0).key = k;
-            (*self.0).value = v;
-        }
-    }
 
+}
+
+impl<K: Ord, V> Clone for node_ptr<K, V>{
+    fn clone(&self) -> node_ptr<K, V>{ //clones the ptr
+        node_ptr(self.0) //returns the pointer
+    }
+}
+
+impl<K: Ord, V> Copy for node_ptr<K, V> {}
+
+impl<K: Ord, V> Ord for node_ptr<K, V> { //compare node key with another node key
+    fn cmp(&self, node: &node_ptr<K, V>) -> Ordering {
+        unsafe{(*self.0).key.cmp(&(*node.0).key)}
+    }
+}
+
+impl<K: Ord, V> Eq for node_ptr<K, V> {} //requried for Ord
+
+impl<K: Ord, V> PartialOrd for node_ptr<K, V> { //required for Ord
+    fn partial_cmp(&self, node: &node_ptr<K, V>) -> Option<Ordering> {
+        unsafe { Some((*self.0).key.cmp(&(*node.0).key)) }
+    }
+}
+
+impl<K: Ord, V> PartialEq for node_ptr<K, V> { //required for Eq and PartialOrd
+    fn eq(&self, node: &node_ptr<K, V>) -> bool {
+        self.0 == node.0
+    }
+}
+
+impl<K: Ord, V> TreeNode<K, V> {
+    #[inline]
+    fn get_pair(self) -> (K, V){
+        (self.key, self.value)
+    }
 }
 
 #[derive(Debug)]
 pub struct RBTree<K: Ord, V> {
     root: node_ptr<K, V>,
-    len: usize,
+    total_leaves: usize,
 }
 
 //######################## PRINTING TREE ################################
 
 const PRINT_SPACE_GLOBAL: u32 = 5;
-
 //TreeNode display
 impl<K, V> Debug for TreeNode<K, V>
 where
@@ -428,14 +386,14 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
     pub fn new() -> RBTree<K, V> {
         RBTree {
             root: node_ptr(ptr::null_mut()),
-            len: 0, //total number of nodes
+            total_leaves: 0, //total number of nodes
         }
     }
 
     // returns len of RBTree
     #[inline]
     pub fn len(&self) -> usize {
-        self.len
+        self.total_leaves
     }
 
     //returns true if tree is empty
@@ -444,10 +402,45 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
         self.root.is_null()
     }
 
+    #[inline]
+    fn set_root(&mut self, mut node: node_ptr<K, V>){
+        node.set_parent(node_ptr(ptr::null_mut()));
+        self.root = node;
+        
+    }
+
+    #[inline]
+    pub fn get_height(&self) -> Option<usize>{
+        let mut height = 0;
+        if self.is_empty(){
+            return Some(height);
+        }else{
+            
+            height = self.get_height_rec(self.root,1);
+
+        }
+
+        return Some(height);
+    }
+
+    #[inline]
+    fn get_height_rec(&self, node: node_ptr<K, V>, mut h: usize) -> usize{
+        if node.is_null(){
+            return h-1;
+        }
+
+        h += 1;
+
+        let height_r = self.get_height_rec(node.get_right(), h);
+        let height_l = self.get_height_rec(node.get_left(), h);
+
+        max(height_r, height_l)
+    }
+
     //similar to BST insertion, then rebalancing is unique to RBTree
     #[inline]
     pub fn insert(&mut self, k: K, v: V) -> Result<(), RBBaseErr>{
-        self.len+=1;
+        self.total_leaves+=1;
         let mut new_node = node_ptr::new(k, v);
         let mut temp_root = self.root;
         let mut temp_node: node_ptr<K, V> = node_ptr(ptr::null_mut());
@@ -505,7 +498,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
         1- If the tree is empty, create new node as root node with color black (done)
         2- If tree is not empty, create new node as leaf node with color Red (done)
         3- If parent of new node is black then exit (done)
-        4- If parent of new node is Red, then check the color of parents sibling of new node:
+        4- If parent of new node is Red, then check the color of parents sibiling of new node:
             a- If color is black or null then do suitable rotation and recolor
             b- If color is Red, then recolor and also check if parent's parent of newnode is not root node then recolor it and recheck (done)
 
@@ -751,7 +744,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
     pub fn delete(&mut self, mut node: node_ptr<K, V>) -> (K,V){
         //self.print_tree(1);
 
-        self.len -= 1;
+        self.total_leaves -= 1;
 
         let mut temp_c = node_ptr(ptr::null_mut());
         let mut temp_p;
@@ -813,11 +806,9 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
             }
             unsafe{
                 let ans = Box::from_raw(node.0);
-                return ans.pair();
+                return ans.get_pair();
             }
         }
-
-        
 
         temp_p = node.get_parent();
         temp_color = node.get_color();
@@ -840,143 +831,99 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
         }
         unsafe{
             let ans = Box::from_raw(node.0);
-            return ans.pair();
+            return ans.get_pair();
         }
 
     }
 
     #[inline]
     fn delete_balance(&mut self, mut node: node_ptr<K, V>, mut parent: node_ptr<K,V>) -> Result<(), RBBaseErr>{
+        //self.print_tree(1);
 
-        let mut temp_node;
-        let mut node_p_l;
-        let mut node_p_r;
+        let mut sibiling;
 
-        while node != self.root && node.is_black() {
-            node_p_l = parent.get_left();
-            node_p_r = parent.get_right();
-            if  node_p_l == node {
-                temp_node = node_p_r;
-
-                if temp_node.is_red() {
-                    temp_node.set_black();
-                    parent.set_red();
-                    self.rotate_left(parent);
-                    temp_node = parent.get_right();
-                }
-
-                if temp_node.get_left().is_black() && temp_node.get_right().is_black() {
-                    temp_node.set_red();
-                    node = parent;
-                    parent = node.get_parent();
-                } else {
-
-                    if temp_node.get_right().is_black() {
-                        temp_node.get_left().set_black();
-                        temp_node.set_red();
-                        self.rotate_right(temp_node);
-                        temp_node = parent.get_right();
-                    }
-
-                    temp_node.set_color(parent.get_color());
-                    parent.set_black();
-                    temp_node.get_right().set_black();
-                    self.rotate_left(parent);
-                    node = self.root;
-                    break;
-                }
-            } else {
-                temp_node = parent.get_left();
-
-                if temp_node.is_red() {
-                    temp_node.set_black();
-                    parent.set_red();
-                    self.rotate_right(parent);
-                    temp_node = parent.get_left();
-                }
-
-
-                if temp_node.get_left().is_black() && temp_node.get_right().is_black() {
-                    temp_node.set_red();
-                    node = parent;
-                    parent = node.get_parent();
-                } else {
-
-                    if temp_node.get_left().is_black() {
-                        temp_node.get_right().set_black();
-                        temp_node.set_red();
-                        self.rotate_left(temp_node);
-                        temp_node = parent.get_left();
-                    }
-
-                    temp_node.set_color(parent.get_color());
-                    parent.set_black();
-                    temp_node.get_left().set_black();
-                    self.rotate_right(parent);
-                    node = self.root;
-                    break;
-                }
-            }
+        if node == self.root{
+            node.set_black();
+            return Ok(());
         }
 
-        node.set_black();
+        if node != self.root && node.is_black(){
+            
+            if node == parent.get_left(){
+            /*
+             P
+            / \
+            N S
+            */
+            sibiling = parent.get_right();
+            }else{
+            /*
+             P
+            / \
+            N S
+            */
+                sibiling = parent.get_left();
+            }
+
+            let mut sibling_l = sibiling.get_left();
+            let mut sibling_r = sibiling.get_right();
+            let mut r;
+            let mut sibiling_p = sibiling.get_parent();
+
+            //Case a: sibiling is black and at least one sibiling's children is red
+            if sibiling.is_black() && (sibling_l.is_red() || sibling_r.is_red()){
+                if sibling_l.is_red(){
+                    r = sibling_l;
+                }else{
+                    r = sibling_r
+                }
+
+                //case a(i): Left Left case
+                if sibiling == sibiling_p.get_left() && (r == sibling_l || (sibling_l.is_red() && sibling_r.is_red())){
+                    self.left_left_rotation(r);
+                }
+                //case a(ii): left right case
+                if sibiling == sibiling_p.get_left() && r == sibling_r{
+                    self.left_right_rotation(r);
+                }
+                //case a(iii): right right case
+                if sibiling == sibiling_p.get_right() && (r == sibling_r || (sibling_l.is_red() && sibling_r.is_red())){
+                    self.right_right_rotation(r);
+                }
+                //case a(iv): left right case
+                if sibiling == sibiling_p.get_right() && r == sibling_l{
+                    self.right_left_rotation(r);
+                }
+                
+            }
+
+            //Case b: if sibiling is black and both children black
+            if sibiling.is_black() && sibling_l.is_black() && sibling_r.is_black(){
+                sibiling.set_red();
+                if sibiling_p.is_black(){
+                    self.delete_balance(sibiling_p, sibiling_p.get_parent()).unwrap();
+                }
+                
+            }
+
+            //Case c: if sibiling is red
+            if sibiling.is_red(){
+                //case c(i)
+                if sibiling == sibiling_p.get_left(){
+                    self.left_left_rotation(sibiling.get_left());
+                }else{
+                    self.right_right_rotation(sibiling.get_right());
+                }
+            }
+            
+
+        }
+        
+
+        
 
         Ok(())
     }
-
-    #[inline]
-    fn rotate_left(&mut self, mut node: node_ptr<K, V>) {
-        let mut temp_node = node.get_right();
-        let mut temp_node_l = temp_node.get_left();
-        let mut node_p = node.get_parent();
-
-        node.set_right(temp_node_l);
-
-        if !temp_node_l.is_null() {
-            temp_node_l.set_parent(node);
-        }
-
-        temp_node.set_parent(node_p);
-        if node == self.root {
-            self.root = temp_node;
-        } else{
-            if node == node_p.get_left() {
-                node_p.set_left(temp_node);
-            } else {
-                node_p.set_right(temp_node);
-            }
-        }
-        temp_node.set_left(node);
-        node.set_parent(temp_node);
-    }
-
-    #[inline]
-    fn rotate_right(&mut self, mut node: node_ptr<K, V>) {
-        let mut temp_node = node.get_left();
-        let mut temp_node_r = temp_node.get_right();
-        let mut node_p = node.get_parent();
-        node.set_left(temp_node_r);
-
-        if !temp_node_r.is_null() {
-            temp_node_r.set_parent(node);
-        }
-
-        temp_node.set_parent(node_p);
-        if node == self.root {
-            self.root = temp_node;
-        } else{
-            if node == node_p.get_right() {
-                node_p.set_right(temp_node);
-            } else {
-                node_p.set_left(temp_node);
-            }
-        }
-        temp_node.set_right(node);
-        node.set_parent(temp_node);
-    }
-
-
-
 
 
     #[inline]
@@ -1014,40 +961,6 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
 
     }
 
-    #[inline]
-    fn set_root(&mut self, mut node: node_ptr<K, V>){
-        node.set_parent(node_ptr(ptr::null_mut()));
-        self.root = node;
-        
-    }
-
-    #[inline]
-    pub fn get_height(&self) -> Option<usize>{
-        let mut height = 0;
-        if self.is_empty(){
-            return Some(height);
-        }else{
-            
-            height = self.get_height_rec(self.root,1);
-
-        }
-
-        return Some(height);
-    }
-
-    #[inline]
-    fn get_height_rec(&self, node: node_ptr<K, V>, mut h: usize) -> usize{
-        if node.is_null(){
-            return h-1;
-        }
-
-        h += 1;
-
-        let height_r = self.get_height_rec(node.get_right(), h);
-        let height_l = self.get_height_rec(node.get_left(), h);
-
-        max(height_r, height_l)
-    }
 
 }
 
@@ -1204,33 +1117,15 @@ mod tests {
         let mut tree: RBTree<usize, usize> = RBTree::new();
 
         
-        tree.insert(4, 4).unwrap();
-        tree.insert(5, 5).unwrap();
-        tree.insert(2, 2).unwrap();
-        tree.insert(1, 1).unwrap();
-        tree.insert(3, 3).unwrap();
-        tree.insert(6, 6).unwrap();
-        tree.insert(0, 0).unwrap();
-        tree.insert(9, 9).unwrap();
-        tree.insert(11, 11).unwrap();
-        tree.insert(13, 13).unwrap();
-        tree.insert(67, 67).unwrap();
-        tree.insert(68, 68).unwrap();
-        tree.insert(69, 69).unwrap();
-        tree.insert(77, 77).unwrap();
-        tree.insert(88, 88).unwrap();
-        tree.insert(99, 99).unwrap();
-        tree.insert(608, 608).unwrap();
-        tree.insert(111, 111).unwrap();
-        tree.insert(222, 222).unwrap();
-        tree.insert(300,300).unwrap();
-        
+        for i in 0..=1000{
+            tree.insert(i, i).unwrap();
+        }
         
 
-        tree.print_tree(1);
+       //tree.print_tree(1);
 
-        tree.remove_node(&11).unwrap();
+        tree.remove_node(&300).unwrap();
 
-        tree.print_tree(1);
+        //tree.print_tree(1);
     }
 }
