@@ -913,26 +913,4 @@ mod tests {
     }
 
 }
-fn main(){
-    let mut tree: AVLTree<usize, usize> = AVLTree::new();
-    tree.insert(10, 10).unwrap();
-    tree.insert(11, 11).unwrap();
-    tree.insert(9, 9).unwrap();
-    tree.insert(12, 12).unwrap();
-    tree.insert(5, 5).unwrap();
-    tree.insert(6, 6).unwrap();
-    tree.insert(17, 17).unwrap();
-    tree.insert(67, 67).unwrap();
-    tree.insert(68, 68).unwrap();
-    tree.insert(69, 69).unwrap();
-    tree.insert(77, 77).unwrap();
-    tree.insert(88, 88).unwrap();
-    tree.insert(99, 99).unwrap();
-    tree.insert(111, 111).unwrap();
-    tree.insert(222, 222).unwrap();
-    tree.insert(300,300).unwrap();
-    tree.insert(608, 608).unwrap();
-    tree.remove_node(&11usize).unwrap();
 
-    tree.print_tree(1);
-}
