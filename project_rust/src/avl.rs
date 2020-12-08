@@ -213,9 +213,29 @@ impl<K: Ord, V> node_ptr<K, V>{
         while !temp_node.get_left().is_null(){
             temp_node = temp_node.get_left(); // recursively keep getting the left child. When no left child exists, that is the smallest node
         }
-
         return temp_node;
     }
+
+    #[inline]
+    // Get the largest value in the tree
+    fn node_max(self) -> node_ptr<K, V>{
+        let mut temp_node = self.clone();
+        while !temp_node.get_right().is_null(){
+            temp_node = temp_node.get_right(); // recursively keep getting the right child. When no right child exists, that is the largest node
+        }
+        return temp_node;
+    }
+
+    #[inline]
+    // Get the root of the tree
+    fn get_root(self) -> node_ptr<K, V>{
+        let mut temp_node = self.clone();
+        while !temp_node.get_parent().is_null(){
+            temp_node = temp_node.get_parent(); // recursively keep getting the parent. When no right child exists, that is the root
+        }
+        return temp_node;
+    }
+
 
     #[inline]
     // If the nodes parent left or right child is itself -> Ergo is a child and not root
@@ -296,9 +316,9 @@ impl<K: Ord + Debug + fmt::Display + Copy, V: Debug> AVLTree<K, V> {
         println!("[INFO] Tree size = {:?}", self.len());
         self.print_rec(self.root, space);
     }
-    
-    // Prints subtree with given key
-     pub fn print_subtree(&self, space:u32, k: &K){
+
+    // Print portion of Tree starting from k node
+    pub fn print_subtree(&self, space:u32, k: &K){
         if self.root.is_null() {
             println!("[NOTE] Tree is Empty");
             return;
@@ -709,9 +729,15 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
             node_l.set_parent(temp_node);
 
             // updates levels and balance
+            println!("DOUBLE");
             self.update_level(temp_p);
             self.balance(temp_c);
-            self.balance(temp_p); // redundant, but to ensure balance
+            self.update_level(temp_p.get_root().node_min());
+            self.update_level(temp_p.get_root());
+            self.balance(temp_p.get_root().node_min());
+            self.update_level(temp_p.get_root().node_max());
+            self.balance(temp_p.get_root().node_max());
+            // self.balance(temp_p);
 
             // return key value pair
             unsafe{
@@ -735,17 +761,35 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
                 temp_p.set_right(temp_c);
             }
         }
-
+        
         // updates levels and balance
+        // update at current node
         self.update_level(temp_p);
         self.balance(temp_c);
-        self.balance(temp_p); // redundant, but to ensure balance
+
+        // update at largest node on small side of change
+        self.update_level(temp_p.get_parent().get_left().node_max()); 
+        self.balance(temp_p.get_parent().get_left().node_max());
+
+        // update at smallest node on large side of change
+        self.update_level(temp_p.get_parent().get_right().node_min());
+        self.balance(temp_p.get_parent().get_right().node_min());
+
+        // // update at largest node overall
+        // self.update_level(temp_p.get_parent().node_max()); 
+        // self.balance(temp_p.get_parent().node_max());
+
+        // // update at smallest node overall
+        // self.update_level(temp_p.get_parent().node_min());
+        // self.balance(temp_p.get_parent().node_min());
+
+        // self.balance(temp_p);
+        
         // return key value pair
         unsafe{
             let ans = Box::from_raw(node.0);
             return ans.pair();
         }
-
     }
 
     #[inline]
@@ -758,7 +802,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
     }
 
     #[inline]
-    pub fn find_node(&self, k: &K) -> node_ptr<K, V>{
+    fn find_node(&self, k: &K) -> node_ptr<K, V>{
         if self.is_empty(){ //tree is empty
             return node_ptr(ptr::null_mut());
         }
@@ -922,23 +966,6 @@ mod tests {
         tree.print_tree(1);
 
         tree.postorder_trav_print();
-    }
-    
-    #[test]
-    fn delete_test(){
-        let mut tree: AVLTree<usize, usize> = AVLTree::new();
-
-        
-        for i in 0..=1000{
-            tree.insert(i, i).unwrap();
-        }
-        
-
-       //tree.print_tree(1);
-
-        tree.remove_node(&300).unwrap();
-
-        //tree.print_tree(1);
     }
 
 }
