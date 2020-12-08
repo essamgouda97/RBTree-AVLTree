@@ -729,22 +729,37 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
             node_l.set_parent(temp_node);
 
             // updates levels and balance
-            println!("DOUBLE");
+            // update at current node
             self.update_level(temp_p);
             self.balance(temp_c);
-            self.update_level(temp_p.get_root().node_min());
-            self.update_level(temp_p.get_root());
-            self.balance(temp_p.get_root().node_min());
-            self.update_level(temp_p.get_root().node_max());
-            self.balance(temp_p.get_root().node_max());
-            // self.balance(temp_p);
 
-            // return key value pair
-            unsafe{
-                let ans = Box::from_raw(node.0);
-                return ans.pair();
+            // update at largest node on small side of change
+            if !temp_p.get_parent().get_left().is_null(){
+                self.update_level(temp_p.get_parent().get_left().node_max()); 
+                self.balance(temp_p.get_parent().get_left().node_max());
             }
-        }
+    
+            // update at smallest node on large side of change
+            if !temp_p.get_parent().get_right().is_null(){
+                self.update_level(temp_p.get_parent().get_right().node_min());
+                self.balance(temp_p.get_parent().get_right().node_min());
+            }
+
+            // update at largest node overall
+            self.update_level(temp_p.get_root().node_max()); 
+            self.balance(temp_p.get_root().node_max());
+
+            // update at smallest node overall
+            self.update_level(temp_p.get_root().node_min());
+            self.balance(temp_p.get_root().node_min());
+
+
+                // return key value pair
+                unsafe{
+                    let ans = Box::from_raw(node.0);
+                    return ans.pair();
+                }
+            }
 
         // finish setting values for single child case
         temp_p = node.get_parent();
@@ -768,20 +783,24 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
         self.balance(temp_c);
 
         // update at largest node on small side of change
-        self.update_level(temp_p.get_parent().get_left().node_max()); 
-        self.balance(temp_p.get_parent().get_left().node_max());
+        if !temp_p.get_parent().get_left().is_null(){
+            self.update_level(temp_p.get_parent().get_left().node_max()); 
+            self.balance(temp_p.get_parent().get_left().node_max());
+        }
 
         // update at smallest node on large side of change
-        self.update_level(temp_p.get_parent().get_right().node_min());
-        self.balance(temp_p.get_parent().get_right().node_min());
+        if !temp_p.get_parent().get_right().is_null(){
+            self.update_level(temp_p.get_parent().get_right().node_min());
+            self.balance(temp_p.get_parent().get_right().node_min());
+        }
 
         // update at largest node overall
-        self.update_level(temp_p.get_parent().node_max()); 
-        self.balance(temp_p.get_parent().node_max());
+        self.update_level(temp_p.get_root().node_max()); 
+        self.balance(temp_p.get_root().node_max());
 
         // update at smallest node overall
-        self.update_level(temp_p.get_parent().node_min());
-        self.balance(temp_p.get_parent().node_min());
+        self.update_level(temp_p.get_root().node_min());
+        self.balance(temp_p.get_root().node_min());
 
         // self.balance(temp_p);
         
