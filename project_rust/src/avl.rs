@@ -758,7 +758,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
     }
 
     #[inline]
-    fn find_node(&self, k: &K) -> node_ptr<K, V>{
+    pub fn find_node(&self, k: &K) -> node_ptr<K, V>{
         if self.is_empty(){ //tree is empty
             return node_ptr(ptr::null_mut());
         }
