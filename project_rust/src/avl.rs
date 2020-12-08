@@ -731,7 +731,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
             // updates levels and balance
             // update at current node
             self.update_level(temp_p);
-            self.balance(temp_c);
+            self.balance(temp_p);
 
             // update at largest node on small side of change
             if !temp_p.get_parent().get_left().is_null(){
