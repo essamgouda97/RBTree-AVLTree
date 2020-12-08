@@ -145,7 +145,7 @@ fn avl_benchmark_deletion(c: &mut Criterion) {
         group.bench_with_input(BenchmarkId::from_parameter(size), size, |b, &size| {
             b.iter(|| {
                 // Creation of an empty tree
-                let mut tree: AVLTree<usize, usize> = AVLTree::new();
+                let mut tree: AVLTree<usize, usize> = AVLTree::new();;
 
                 //Values with tree_size inserted into the tree
                 for i in 0..=size {
@@ -165,11 +165,13 @@ fn avl_benchmark_deletion(c: &mut Criterion) {
 }
 
 criterion_group!(
-    benches, 
-    rb_benchmark_main, 
-    rb_benchmark_insertion,
-    rb_benchmark_deletion, 
-    avl_benchmark_main, 
-    avl_benchmark_insertion,
-    avl_benchmark_deletion);
+    name = benches; 
+    config = Criterion::default().significance_level(0.1).sample_size(10);
+    //targets = rb_benchmark_main 
+    //targets = rb_benchmark_insertion
+    //targets = rb_benchmark_deletion
+    //targets = avl_benchmark_main
+    //targets = avl_benchmark_insertion
+    targets = avl_benchmark_deletion
+);
 criterion_main!(benches);

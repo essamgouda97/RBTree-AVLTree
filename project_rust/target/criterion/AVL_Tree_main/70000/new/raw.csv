@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+AVL_Tree_main,,70000,,,104499931.0,ns,5
+AVL_Tree_main,,70000,,,207185600.0,ns,10
+AVL_Tree_main,,70000,,,311054597.0,ns,15
+AVL_Tree_main,,70000,,,415438238.0,ns,20
+AVL_Tree_main,,70000,,,519025277.0,ns,25
+AVL_Tree_main,,70000,,,620603301.0,ns,30
+AVL_Tree_main,,70000,,,725699893.0,ns,35
+AVL_Tree_main,,70000,,,830119095.0,ns,40
+AVL_Tree_main,,70000,,,931819170.0,ns,45
+AVL_Tree_main,,70000,,,1034973734.0,ns,50

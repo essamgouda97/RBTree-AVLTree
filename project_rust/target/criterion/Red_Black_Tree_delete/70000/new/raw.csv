@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+Red_Black_Tree_delete,,70000,,,93811529.0,ns,8
+Red_Black_Tree_delete,,70000,,,187118981.0,ns,16
+Red_Black_Tree_delete,,70000,,,280653471.0,ns,24
+Red_Black_Tree_delete,,70000,,,377155721.0,ns,32
+Red_Black_Tree_delete,,70000,,,470363132.0,ns,40
+Red_Black_Tree_delete,,70000,,,568728182.0,ns,48
+Red_Black_Tree_delete,,70000,,,653013473.0,ns,56
+Red_Black_Tree_delete,,70000,,,746147137.0,ns,64
+Red_Black_Tree_delete,,70000,,,840763500.0,ns,72
+Red_Black_Tree_delete,,70000,,,937221939.0,ns,80

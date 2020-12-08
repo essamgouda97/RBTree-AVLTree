@@ -741,7 +741,7 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> RBTree<K, V> {
     }
 
     #[inline]
-    pub fn delete(&mut self, mut node: node_ptr<K, V>) -> (K,V){
+    fn delete(&mut self, mut node: node_ptr<K, V>) -> (K,V){
         //self.print_tree(1);
 
         self.total_leaves -= 1;
