@@ -775,13 +775,13 @@ impl<K: Ord + Debug + fmt::Display, V: Debug> AVLTree<K, V> {
         self.update_level(temp_p.get_parent().get_right().node_min());
         self.balance(temp_p.get_parent().get_right().node_min());
 
-        // // update at largest node overall
-        // self.update_level(temp_p.get_parent().node_max()); 
-        // self.balance(temp_p.get_parent().node_max());
+        // update at largest node overall
+        self.update_level(temp_p.get_parent().node_max()); 
+        self.balance(temp_p.get_parent().node_max());
 
-        // // update at smallest node overall
-        // self.update_level(temp_p.get_parent().node_min());
-        // self.balance(temp_p.get_parent().node_min());
+        // update at smallest node overall
+        self.update_level(temp_p.get_parent().node_min());
+        self.balance(temp_p.get_parent().node_min());
 
         // self.balance(temp_p);
         
