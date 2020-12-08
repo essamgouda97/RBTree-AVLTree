@@ -3,8 +3,14 @@ mod avl;
 use self::red_black::RBTree;
 use self::avl::AVLTree;
 use std::io::{self,Write};
-//mod testy;
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Red Black Tree Function Implementation
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Insert Red Black Tree
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn rb_insert(tree: &mut RBTree<usize, usize>){
     loop{
         print!("\nEnter node value: ");
@@ -21,6 +27,10 @@ fn rb_insert(tree: &mut RBTree<usize, usize>){
     }
 
 }
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Delete Red Black Tree
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 fn rb_delete(tree: &mut RBTree<usize, usize>){
     loop{
         print!("\nEnter node value: ");
@@ -36,12 +46,21 @@ fn rb_delete(tree: &mut RBTree<usize, usize>){
         }
     }
 }
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Count Nodes Red Black Tree
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn rb_count(tree: &RBTree<usize, usize>){
     println!("Tree has a total of {} leaves", tree.len());
 }
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Get Height Red Black Tree
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn rb_height(tree: &RBTree<usize, usize>){
     println!("Height of tree = {}", tree.get_height().unwrap());
 }
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Print Red Black Tree
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn rb_print(tree: &RBTree<usize, usize>){
     loop{
         println!("\nChoose printing style:");
@@ -74,6 +93,9 @@ fn rb_print(tree: &RBTree<usize, usize>){
 
     }
 }
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Is Red Black Tree Empty
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn rb_empty(tree: &RBTree<usize, usize>){
     if tree.is_empty(){
         println!("Tree is empty");
@@ -82,6 +104,9 @@ fn rb_empty(tree: &RBTree<usize, usize>){
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Insert AVL Tree
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn avl_insert(tree: &mut AVLTree<usize, usize>){
     loop{
         print!("\nEnter node value: ");
@@ -98,6 +123,10 @@ fn avl_insert(tree: &mut AVLTree<usize, usize>){
     }
 
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Insert AVL Tree
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn avl_delete(tree: &mut AVLTree<usize, usize>){
     loop{
         print!("\nEnter node value: ");
@@ -113,12 +142,23 @@ fn avl_delete(tree: &mut AVLTree<usize, usize>){
         }
     }
 }
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Count Nodes AVL Tree
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn avl_count(tree: &AVLTree<usize, usize>){
     println!("Tree has a total of {} leaves", tree.len());
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Get Height AVL Tree
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn avl_height(tree: &AVLTree<usize, usize>){
     println!("Height of tree = {}", tree.get_height().unwrap());
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Print AVL Tree
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn avl_print(tree: &AVLTree<usize, usize>){
     loop{
         println!("\nChoose printing style:");
@@ -151,6 +191,10 @@ fn avl_print(tree: &AVLTree<usize, usize>){
 
     }
 }
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Is AVL Tree Empty
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 fn avl_empty(tree: &AVLTree<usize, usize>){
     if tree.is_empty(){
         println!("Tree is empty");
@@ -158,6 +202,83 @@ fn avl_empty(tree: &AVLTree<usize, usize>){
         println!("Tree isn't empty, has a total of {} leaves.", tree.len());
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Red Black Tree User Functionality
+////////////////////////////////////////////////////////////////////////////////////////////////
+fn rb_tree(){
+    let mut tree: RBTree<usize, usize> = RBTree::new();
+    loop{
+        
+        println!("\nRed-Black Tree selected, here is your options: ");
+        println!("(1) Insert node");
+        println!("(2) Delete node");
+        println!("(3) Count number of leaves");
+        println!("(4) Return height of Tree");
+        println!("(5) Print Tree");
+        println!("(6) Check if tree is empty");
+        println!("(-1) Exit");
+        print!("Choice: ");
+        io::stdout().flush().unwrap();
+        let choice = input_num();
+        if choice.is_none(){
+            continue;
+        }
+        match choice{
+            Some(1) => {rb_insert(&mut tree);continue;},
+            Some(2) => {rb_delete(&mut tree);continue;},
+            Some(3) => {rb_count(&tree);continue;},
+            Some(4) => {rb_height(&tree);continue;},
+            Some(5) => {rb_print(&tree);continue;},
+            Some(6) => {rb_empty(&tree);continue;},
+            Some(-1) => {break;},
+            _ => {
+                println!("Invalid choice ! Please try again.");
+                continue;
+            }
+        }
+    }
+}
+////////////////////////////////////////////////////////////////////////////////////////////////
+// AVL Tree User Functionality
+////////////////////////////////////////////////////////////////////////////////////////////////
+fn avl_tree(){
+    let mut tree: AVLTree<usize, usize> = AVLTree::new();
+    loop{
+        
+        println!("\nRed-Black Tree selected, here is your options: ");
+        println!("(1) Insert node");
+        println!("(2) Delete node");
+        println!("(3) Count number of leaves");
+        println!("(4) Return height of Tree");
+        println!("(5) Print Tree");
+        println!("(6) Check if tree is empty");
+        println!("(-1) Exit");
+        print!("Choice: ");
+        io::stdout().flush().unwrap();
+        let choice = input_num();
+        if choice.is_none(){
+            continue;
+        }
+        match choice{
+            Some(1) => {avl_insert(&mut tree);continue;},
+            Some(2) => {avl_delete(&mut tree);continue;},
+            Some(3) => {avl_count(&tree);continue;},
+            Some(4) => {avl_height(&tree);continue;},
+            Some(5) => {avl_print(&tree);continue;},
+            Some(6) => {avl_empty(&tree);continue;},
+            Some(-1) => {break;},
+            _ => {
+                println!("Invalid choice ! Please try again.");
+                continue;
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Input Handling
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 fn input_num() -> Option<i8> {
     let mut buffer = String::new();
@@ -176,6 +297,9 @@ fn input_num() -> Option<i8> {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Print Welcome Message on starting
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn print_welcome_tree(maxsize: u32){
     let mut x: u32;
     let mut k: u32 = 1;
@@ -210,6 +334,9 @@ fn print_welcome_tree(maxsize: u32){
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Main
+////////////////////////////////////////////////////////////////////////////////////////////////
 fn main() {
     println!("\n\tTrees, Trees and More Trees\n");
     print_welcome_tree(37);
@@ -226,79 +353,9 @@ fn main() {
             continue;
         }
         match tree_choice{
-            Some(1) => {rb_tree_create();break;},
-            Some(2) => {avl_tree_create();break;},
+            Some(1) => {rb_tree();break;},
+            Some(2) => {avl_tree();break;},
             Some(-1) => {println!("Thank you, have a great one !"); break;}
-            _ => {
-                println!("Invalid choice ! Please try again.");
-                continue;
-            }
-        }
-
-    }
-
-}
-
-fn rb_tree_create(){
-    let mut tree: RBTree<usize, usize> = RBTree::new();
-    loop{
-        
-        println!("\nRed-Black Tree selected, here is your options: ");
-        println!("(1) Insert node");
-        println!("(2) Delete node");
-        println!("(3) Count number of leaves");
-        println!("(4) Return height of Tree");
-        println!("(5) Print Tree");
-        println!("(6) Check if tree is empty");
-        println!("(-1) Exit");
-        print!("Choice: ");
-        io::stdout().flush().unwrap();
-        let choice = input_num();
-        if choice.is_none(){
-            continue;
-        }
-        match choice{
-            Some(1) => {rb_insert(&mut tree);continue;},
-            Some(2) => {rb_delete(&mut tree);continue;},
-            Some(3) => {rb_count(&tree);continue;},
-            Some(4) => {rb_height(&tree);continue;},
-            Some(5) => {rb_print(&tree);continue;},
-            Some(6) => {rb_empty(&tree);continue;},
-            Some(-1) => {break;},
-            _ => {
-                println!("Invalid choice ! Please try again.");
-                continue;
-            }
-        }
-    }
-}
-
-fn avl_tree_create(){
-    let mut tree: AVLTree<usize, usize> = AVLTree::new();
-    loop{
-        
-        println!("\nAVL Tree selected, here is your options: ");
-        println!("(1) Insert node");
-        println!("(2) Delete node");
-        println!("(3) Count number of leaves");
-        println!("(4) Return height of Tree");
-        println!("(5) Print Tree");
-        println!("(6) Check if tree is empty");
-        println!("(-1) Exit");
-        print!("Choice: ");
-        io::stdout().flush().unwrap();
-        let choice = input_num();
-        if choice.is_none(){
-            continue;
-        }
-        match choice{
-            Some(1) => {avl_insert(&mut tree);continue;},
-            Some(2) => {avl_delete(&mut tree);continue;},
-            Some(3) => {avl_count(&tree);continue;},
-            Some(4) => {avl_height(&tree);continue;},
-            Some(5) => {avl_print(&tree);continue;},
-            Some(6) => {avl_empty(&tree);continue;},
-            Some(-1) => {break;},
             _ => {
                 println!("Invalid choice ! Please try again.");
                 continue;
